@@ -1,0 +1,51 @@
+Router în C - Tema 1 - Protocoale de Comunicatie
+
+    Acest proiect implementează un router simplu în limbajul de programare C.
+    Am implementat protocolul IPv4, urmand pasii prezentati in cerinta temei.
+        1) Mai intai am verificat daca am primit un pachet IPv4, 
+        2) Apoi am verificat checksum-ul cu ajutorul functiei check_checksumIP,
+        dacă sumele diferă, pachetul a fost corupt și trebuie aruncat.
+        3) Verific daca routerul este destinatarul,  În acest caz, routerul 
+        nu trebuie să trimită mai departe pachetul, ci să îi înțeleagă conținutul 
+        pentru a putea acționa în consecință, va procesa conținutul acestuia conform 
+        funcționalității sale, cum ar fi răspunsul la pachete ICMP de tip ECHO REQUEST.
+        4) Cautare in tabela de routare - routerul caută cea mai buna adresa IP destinație 
+        a pachetului, cu functia get_best_route, în tabela de rutare pentru a determina 
+        adresa următorului hop, precum și interfața  pe care va trebui scos pachetul.
+        În caz că nu găsește nimic, pachetul este aruncat. Routerul va trimite înapoi,
+        către emițătorul pachetului un mesaj ICMP de tip "Destination unreachable".
+        5) Verificare TTL - pachetele cu câmpul TTL având valoarea 1 sau 0 trebuiesc aruncate. 
+        Routerul va trimite înapoi, către emițătorul pachetului un mesaj ICMP de tip 
+        "Time exceeded". Altfel, câmpul TTL e decrementat.
+        6) Actualizare checksum
+        7) Routerul trebuie să actualizeze adresele Ethernet ale pachetului și să-l trimită mai departe. 
+        Acest proces implică căutarea adresei MAC a următorului hop în tabela ARP folosind funcția 
+        get_arp_entry. Dacă adresa MAC nu este găsită, routerul ar trebui să inițieze un proces ARP 
+        request pentru a o obține.
+        8) Trimiterea noului pachet pe interfața corespunzătoare următorului hop.
+
+Structuri de date: 
+        Programul utilizează două structuri de date principale: 
+            rtable și arp_table. rtable este o tabelă de rutare care stochează rutele către diferite 
+            destinații. arp_table este o tabelă ARP care stochează asocierile dintre adresele IP și 
+            adresele MAC.
+
+Functii utilizate:
+        - check_checksumIP: routerul trebuie să recalculeze suma de control a pachetului, și să o 
+                            compare cu cea primită în antetul de IP; dacă sumele diferă, pachetul a 
+                            fost corupt și trebuie aruncat.
+                    
+        - get_best_route: LPM - cautare binara recursiva - Această funcție implementează algoritmul 
+                          de căutare binară pentru a găsi cea mai bună rută pentru o anumită adresă IP 
+                          destinație. Funcția returnează un pointer către intrarea corespunzătoare din 
+                          tabela de rutare. 
+
+        - get_arp_entry: functie implementata in laboratorul 4
+
+        - compare: Această funcție este utilizată pentru a compara două intrări din tabela de rutare în 
+                   timpul sortării, pentru a obtine o sortare descrescatoare. Ea compară prefixele și 
+                   măștile de rețea ale celor două intrări și returnează diferența dintre ele.
+
+        - send_icmp: Această funcție este responsabilă pentru trimiterea mesajelor ICMP, conform tipului 
+                     dat in functie. Ea construiește un pachet ICMP cu un anumit tip, actualizează antetele 
+                     Ethernet și IP și apoi trimite pachetul pe interfața de rețea corespunzătoare.
